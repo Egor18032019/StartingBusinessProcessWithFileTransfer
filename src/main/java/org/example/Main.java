@@ -1,14 +1,12 @@
 package org.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -27,7 +25,7 @@ import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AudioRecorderAndLauncher  {
+public class Main {
 
     private static final String RUNA_URL = "http://localhost:8080";
     private static final String LOGIN = "Administrator";
@@ -68,7 +66,7 @@ public class AudioRecorderAndLauncher  {
                     continue;
                 }
             } else {
-                audioFile = recordAudioWithStop(scanner);
+                audioFile = recordAudioWithStop();
                 if (audioFile == null) {
                     System.out.println("Запись отменена или не удалась");
                     continue;
@@ -124,6 +122,7 @@ public class AudioRecorderAndLauncher  {
 
     /**
      * Авторизация: получение JWT
+     *
      * @return JWT-токен
      */
     private static String authenticate() throws Exception {
@@ -149,10 +148,9 @@ public class AudioRecorderAndLauncher  {
 
     /**
      * Запись аудио
-     * @param scanner Scanner
      * @return File аудиофайл
      */
-    private static File recordAudioWithStop(Scanner scanner) throws LineUnavailableException, IOException {
+    private static File recordAudioWithStop() throws LineUnavailableException, IOException {
         // ... (ваш существующий код)
         // (Оставлен без изменений, так как он рабочий)
         AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
@@ -244,6 +242,7 @@ public class AudioRecorderAndLauncher  {
 
     /**
      * Поиск последнего аудиофайла
+     *
      * @return File аудиофайл
      */
     private static File findLatestAudioFile() {
