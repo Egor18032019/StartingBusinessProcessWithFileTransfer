@@ -47,7 +47,7 @@ public class Main {
         System.out.println("  's'   - пропустить запись и запустить последний файл");
         System.out.println("\nНажмите Enter, чтобы начать запись...");
 
-        File audioFile = null;
+        File audioFile;
 
         while (true) {
             String input = scanner.nextLine().trim().toLowerCase();
@@ -151,8 +151,7 @@ public class Main {
      * @return File аудиофайл
      */
     private static File recordAudioWithStop() throws LineUnavailableException, IOException {
-        // ... (ваш существующий код)
-        // (Оставлен без изменений, так как он рабочий)
+
         AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
@@ -165,7 +164,6 @@ public class Main {
         line.start();
 
         System.out.println("🔴 ЗАПИСЬ... Нажмите Enter для остановки");
-
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
