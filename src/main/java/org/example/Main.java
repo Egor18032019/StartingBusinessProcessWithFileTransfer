@@ -1,6 +1,9 @@
 package org.example;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -10,6 +13,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.MultiPartContentProvider;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpMethod;
 
 
 import javax.sound.sampled.*;
@@ -23,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
@@ -79,8 +88,9 @@ public class Main {
                 System.out.println("✅ Авторизация успешна");
 
                 System.out.println("🚀 Запуск процесса с файлом...");
-                launchProcessWithFileBase64(jwtToken, audioFile);
-                System.out.println("✅ Процесс успешно запущен!");
+//                launchProcessWithFileBase64(jwtToken, audioFile);
+                launchProcessWithVariables(jwtToken, audioFile);
+                System.out.println("✅ Процесс успешно запущеsн!");
 
                 System.out.println("\nНажмите Enter для новой записи, 's' для повторного запуска, 'q' для выхода...");
             } catch (Exception e) {
@@ -94,7 +104,7 @@ public class Main {
         System.out.println("Программа завершена.");
     }
 
-    private static void launchProcessWithFileBase64(String jwtToken, File audioFile) throws Exception {
+    private static String launchProcessWithFileBase64(String jwtToken, File audioFile) throws Exception {
         String encodedProcessName = URLEncoder.encode(PROCESS_NAME, "UTF-8");
 
         // Кодируем файл в Base64
@@ -117,6 +127,47 @@ public class Main {
 
             System.out.println("Статус: " + response.getStatusLine().getStatusCode());
             System.out.println("Ответ: " + responseBody);
+            return responseBody;
+        }
+    }
+
+    public static void launchProcessWithVariables(String jwtToken, File audioFile) throws Exception {
+        // 1. Подготавливаем файловую переменную
+        byte[] fileBytes = Files.readAllBytes(audioFile.toPath());
+        String base64Data = Base64.getEncoder().encodeToString(fileBytes);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        ObjectNode fileValue = mapper.createObjectNode()
+                .put("name", audioFile.getName())
+                .put("contentType", "audio/wav")
+                .put("data", base64Data)
+                .put("stringValue", audioFile.getName());
+
+        // 2. Формируем JSON: { "аудиофайл": { ... } }
+        ObjectNode variables = mapper.createObjectNode();
+        variables.set(AUDIO_VAR_NAME, fileValue); // КЛЮЧ — имя переменной
+
+        String jsonBody = mapper.writeValueAsString(variables);
+        String encodedName = java.net.URLEncoder.encode(PROCESS_NAME, "UTF-8");
+        String url = RUNA_URL + "/restapi/process/start?name=" + encodedName;
+
+        // 3. Отправляем как application/json
+        HttpPut put = new HttpPut(url);
+        put.setHeader("Authorization", "Bearer " + jwtToken);
+        put.setHeader("Content-Type", "application/json; charset=UTF-8");
+        put.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
+        System.out.println("Отправляю JSON: " + jsonBody);
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpResponse response = client.execute(put);
+            int status = response.getStatusLine().getStatusCode();
+            String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            System.out.println("Статус: " + status);
+            System.out.println("Ответ: " + body);
+            if (status != 200) {
+                throw new RuntimeException("Ошибка: " + body);
+            }
         }
     }
 
@@ -148,6 +199,7 @@ public class Main {
 
     /**
      * Запись аудио
+     *
      * @return File аудиофайл
      */
     private static File recordAudioWithStop() throws LineUnavailableException, IOException {
