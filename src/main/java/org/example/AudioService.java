@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioService {
-    private static final int DEFAULT_MAX_RECORDING_TIME_MS = 5_000; // 30 секунд
+    private static final int DEFAULT_MAX_RECORDING_TIME_MS = 30_000;
     private static final int BUFFER_SIZE = 4096;
 
     private String AUDIO_FOLDER;
