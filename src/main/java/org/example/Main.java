@@ -60,7 +60,7 @@ public class Main {
             } catch (Exception e) {
                 System.err.println("❌ Ошибка: " + e.getMessage());
                 e.printStackTrace();
-                System.out.println("\nПопробовать еще раз? (Enter - да, 'q' - выход)");
+                System.out.println("\nПопробовать еще раз отправить последний записанный файл ? (Enter - да, 'q' - выход)");
             }
         }
 
