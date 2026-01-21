@@ -21,8 +21,8 @@ public class Main {
         System.out.println("================================");
         System.out.println("Команды:");
         System.out.println("  Enter - начать/остановить запись");
-        System.out.println("  'q'   - выйти из программы");
-        System.out.println("  's'   - пропустить запись и запустить последний файл");
+        System.out.println("  'q' + Enter - выйти из программы");
+        System.out.println("  's' + Enter - пропустить запись и запустить последний файл");
         System.out.println("\nНажмите Enter, чтобы начать запись...");
 
         File audioFile;
@@ -49,6 +49,7 @@ public class Main {
                     System.out.println("Найден последний файл: " + audioFile.getName());
                 } else {
                     System.out.println("Файлы не найдены в папке " + audioService.getFolder());
+                    System.out.println(" Нажмите Enter для новой записи, 'q' и + Enter для выхода.");
                     continue;
                 }
             } else {
